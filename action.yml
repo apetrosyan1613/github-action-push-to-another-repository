@@ -1,69 +1,67 @@
-name: Push directory to another repository
-description: >-
-  Useful to push files to another repository to be used, for example, via github
-  pages
+name: 'Commit and Creating PR'
+description: 'this action runs build command and push it in another repo with creating PR'
 inputs:
-  source-before-directory:
-    description: Source before directory from the origin directory
-    required: false
-  source-directory:
-    description: Source directory from the origin directory
+  target-repo:
     required: true
-  destination-github-username:
-    description: Name of the destination username/organization
+    default: 'apetrosyan1613/test-repo1'
+  source-repo-path:
     required: true
-  destination-repository-name:
-    description: Destination repository
+    default: 'specs'
+  target-repo-path:
     required: true
-  user-email:
-    description: Email for the git commit
+    default: 'qase-javascript'
+  build-command:
     required: true
-  github-server:
-    description: 'Github server'
-    default: 'github.com'
-    required: false
-  user-name:
-    description: >-
-      [Optional] Name for the git commit. Defaults to the destination
-      username/organization name
-    required: false
-    default: ''
-  destination-repository-username:
-    description: '[Optional] Username/organization for the destination repository'
-    required: false
-    default: ''
-  target-branch:
-    description: >-
-      [Optional] set target branch name for the destination repository. Defaults
-      to "main"
-    default: main
-    required: false
-  commit-message:
-    description: >-
-      [Optional] commit message for the output repository. ORIGIN_COMMIT is
-      replaced by the URL@commit in the origin repo
-    default: Update from ORIGIN_COMMIT
-    required: false
-  target-directory:
-    description: '[Optional] The directory to wipe and replace in the target repository'
-    default: ''
-    required: false
-        
+    default: './Taskfile typescript'
+
+outputs:
+  random-number:
+    description: "Random number"
+    value: ${{ steps.random-number-generator.outputs.random-number }}
 runs:
-  using: docker
-  image: Dockerfile
-  args:
-    - '${{ inputs.source-before-directory }}'
-    - '${{ inputs.source-directory }}'
-    - '${{ inputs.destination-github-username }}'
-    - '${{ inputs.destination-repository-name }}'
-    - '${{ inputs.github-server }}'
-    - '${{ inputs.user-email }}'
-    - '${{ inputs.user-name }}'
-    - '${{ inputs.destination-repository-username }}'
-    - '${{ inputs.target-branch }}'
-    - '${{ inputs.commit-message }}'
-    - '${{ inputs.target-directory }}'
-branding:
-  icon: git-commit
-  color: green
+  using: "composite"
+  steps:
+    - name: set branch name
+      id: new_branch
+      run: echo ::set-output name=new_branch::$(echo "client_update_$(date +'%Y-%m-%dT%H.%M.%S')")
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        path: ${{ inputs.source-repo-path }}
+    - name: Checkout repo
+      uses: actions/checkout@v3
+      with:
+        repository:  ${{ inputs.target-repo }}
+        path: ${{ inputs.target-repo-path }}
+        token: ${{secrets.API_TOKEN_GITHUB}}
+    - name: run js client generation
+      working-directory: ./specs
+      run: ${{ inputs.build-command }}
+    # - run: cp -R ./specs/examples/sdk/ts/* ./qase-javascript/qaseio/src
+    # - id: git-check
+    #   working-directory: ./qase-javascript
+    #   run: echo ::set-output name=modified::$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)
+    # - if: steps.git-check.outputs.modified == 'true'
+    #   working-directory: ./qase-javascript
+    #   run: |
+    #    git config --global user.name 'Sergey Skaridov'
+    #    git config --global user.email 's.skaridov@gmail.com'
+    #    git checkout -b ${{ steps.new_branch.outputs.new_branch }}
+    #    git add -A
+    #    git commit -m '[build] update client'
+    #    git push --set-upstream origin ${{ steps.new_branch.outputs.new_branch }}
+    # - name: create pr
+    #   id: create_pr
+    #   uses: octokit/request-action@v2.x
+    #   with:
+    #     route: POST /repos/{owner}/{repo}/pulls
+    #     owner: sklmx
+    #     repo: qase-javascript
+    #     base: 'master'
+    #     head: ${{ steps.new_branch.outputs.new_branch }}
+    #     title: 'Specs updated'
+    #     body: 'This PR is auto-generated'
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.JS_REPO_TOKEN }}
+
+
