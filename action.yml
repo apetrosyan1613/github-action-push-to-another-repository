@@ -53,10 +53,10 @@ runs:
         path: ${{ inputs.target-repo-path }}
         token: ${{ inputs.token }}
     - name: run js client generation
-      working-directory: ./specs
+      working-directory: ${{ inputs.source-repo-path }}
       run: ${{ inputs.build-command }}
       shell: bash
-    - run: cp -R ${{ inputs.source-copy-dir }} ${{ inputs.target-copy-dir }}
+    - run: ls && cp -R ${{ inputs.source-copy-dir }} ${{ inputs.target-copy-dir }}
       shell: bash
     - id: git-check
       working-directory: ${{ inputs.target-repo-path }}
