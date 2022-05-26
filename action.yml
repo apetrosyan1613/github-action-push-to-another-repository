@@ -15,6 +15,21 @@ inputs:
     default: './Taskfile typescript'
   token:
     requre: true
+  source-copy-dir:
+    required: true
+    default: ''   
+  target-copy-dir:
+    required: true
+    default: ''
+  git-username:
+    required: true
+    default: '' 
+  git-email:
+    required: true
+    default: '' 
+  commit-message:
+    required: true
+    default: ''     
 
 outputs:
   random-number:
@@ -41,19 +56,21 @@ runs:
       working-directory: ./specs
       run: ${{ inputs.build-command }}
       shell: bash
-    # - run: cp -R ./specs/examples/sdk/ts/* ./qase-javascript/qaseio/src
-    # - id: git-check
-    #   working-directory: ./qase-javascript
-    #   run: echo ::set-output name=modified::$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)
-    # - if: steps.git-check.outputs.modified == 'true'
-    #   working-directory: ./qase-javascript
-    #   run: |
-    #    git config --global user.name 'Sergey Skaridov'
-    #    git config --global user.email 's.skaridov@gmail.com'
-    #    git checkout -b ${{ steps.new_branch.outputs.new_branch }}
-    #    git add -A
-    #    git commit -m '[build] update client'
-    #    git push --set-upstream origin ${{ steps.new_branch.outputs.new_branch }}
+    - run: cp -R ${{ input.source-copy-dir }} ${{ inputs.target-copy-dir }}
+      shell: bash
+    - id: git-check
+      working-directory: ${{ inputs.target-repo-path }}
+      run: echo ::set-output name=modified::$(if [ -n "$(git status --porcelain)" ]; then echo "true"; else echo "false"; fi)
+    - if: steps.git-check.outputs.modified == 'true'
+      shell: bash
+      working-directory: ${{ inputs.target-repo-path }}
+      run: |
+       git config --global user.name "${{ inputs.git-username }}"
+       git config --global user.email "${{ inputs.git-email }}"
+       git checkout -b ${{ steps.new_branch.outputs.new_branch }}
+       git add -A
+       git commit -m ${{ inputs.commit-message }}
+       git push --set-upstream origin ${{ steps.new_branch.outputs.new_branch }}
     # - name: create pr
     #   id: create_pr
     #   uses: octokit/request-action@v2.x
