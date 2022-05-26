@@ -13,6 +13,8 @@ inputs:
   build-command:
     required: true
     default: './Taskfile typescript'
+  token:
+    requre: true
 
 outputs:
   random-number:
@@ -34,7 +36,7 @@ runs:
       with:
         repository:  ${{ inputs.target-repo }}
         path: ${{ inputs.target-repo-path }}
-        token: ${{secrets.API_TOKEN_GITHUB}}
+        token: ${{ inputs.token }}
     - name: run js client generation
       working-directory: ./specs
       run: ${{ inputs.build-command }}
