@@ -85,6 +85,7 @@ runs:
        git push --set-upstream origin ${{ steps.new_branch.outputs.new_branch }}
     - name: create pr
       id: create_pr
+      if: steps.git-check.outputs.modified == 'true'
       uses: octokit/request-action@v2.x
       with:
         route: POST /repos/{owner}/{repo}/pulls
