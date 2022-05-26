@@ -56,7 +56,7 @@ runs:
       working-directory: ${{ inputs.source-repo-path }}
       run: ${{ inputs.build-command }}
       shell: bash
-    - run: ls  && ls ${{ inputs.target-repo-path }} && cp -R ${{ inputs.source-copy-dir }} ${{ inputs.target-copy-dir }}
+    - run: cp -R ${{ inputs.source-copy-dir }} ${{ inputs.target-copy-dir }}
       shell: bash
     - id: git-check
       working-directory: ${{ inputs.target-repo-path }}
@@ -70,7 +70,7 @@ runs:
        git config --global user.email "${{ inputs.git-email }}"
        git checkout -b ${{ steps.new_branch.outputs.new_branch }}
        git add -A
-       git commit -m ${{ inputs.commit-message }}
+       git commit -m "${{ inputs.commit-message }}"
        git push --set-upstream origin ${{ steps.new_branch.outputs.new_branch }}
     # - name: create pr
     #   id: create_pr
