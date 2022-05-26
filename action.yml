@@ -56,7 +56,7 @@ runs:
       working-directory: ${{ inputs.source-repo-path }}
       run: ${{ inputs.build-command }}
       shell: bash
-    - run: ls && cp -R ${{ inputs.source-copy-dir }} ${{ inputs.target-copy-dir }}
+    - run: ls && ls {{ inputs.source-copy-dir }} && ls ${{ inputs.target-copy-dir }} && cp -R ${{ inputs.source-copy-dir }} ${{ inputs.target-copy-dir }}
       shell: bash
     - id: git-check
       working-directory: ${{ inputs.target-repo-path }}
