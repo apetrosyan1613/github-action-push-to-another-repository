@@ -1,15 +1,18 @@
 name: 'Commit and Creating PR'
 description: 'this action runs build command and push it in another repo with creating PR'
 inputs:
-  target-repo:
+  target-repo-owner:
     required: true
-    default: 'apetrosyan1613/test-repo1'
+    default: ''
+  target-repo-name:
+    required: true
+    default: ''
+  target-repo-path:
+    required: true
+    default: ''
   source-repo-path:
     required: true
     default: 'specs'
-  target-repo-path:
-    required: true
-    default: 'qase-javascript'
   build-command:
     required: true
     default: './Taskfile typescript'
@@ -30,7 +33,15 @@ inputs:
   commit-message:
     required: true
     default: ''     
-
+  base-pr-branch:
+    required: true
+    default: 'master'
+  pr-title: 
+    required: true
+    default: ''
+  pr-body: 
+    required: true
+    default: ''
 outputs:
   random-number:
     description: "Random number"
@@ -46,10 +57,10 @@ runs:
       uses: actions/checkout@v3
       with:
         path: ${{ inputs.source-repo-path }}
-    - name: Checkout repo
+    - name: Checkout target repo
       uses: actions/checkout@v3
       with:
-        repository:  ${{ inputs.target-repo }}
+        repository:  ${{ inputs.target-repo-owner }}/${{ inputs.target-repo-name }}
         path: ${{ inputs.target-repo-path }}
         token: ${{ inputs.token }}
     - name: run js client generation
@@ -72,18 +83,18 @@ runs:
        git add -A
        git commit -m "${{ inputs.commit-message }}"
        git push --set-upstream origin ${{ steps.new_branch.outputs.new_branch }}
-    # - name: create pr
-    #   id: create_pr
-    #   uses: octokit/request-action@v2.x
-    #   with:
-    #     route: POST /repos/{owner}/{repo}/pulls
-    #     owner: sklmx
-    #     repo: qase-javascript
-    #     base: 'master'
-    #     head: ${{ steps.new_branch.outputs.new_branch }}
-    #     title: 'Specs updated'
-    #     body: 'This PR is auto-generated'
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.JS_REPO_TOKEN }}
+    - name: create pr
+      id: create_pr
+      uses: octokit/request-action@v2.x
+      with:
+        route: POST /repos/{owner}/{repo}/pulls
+        owner: ${{ inputs.target-repo-owner }}
+        repo: ${{ inputs.target-repo-name }}
+        base: ${{ inputs.base-pr-branch }}
+        head: ${{ steps.new_branch.outputs.new_branch }}
+        title: ${{ inputs.pr-title }}
+        body: ${{ inputs.pr-body }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
 
 
