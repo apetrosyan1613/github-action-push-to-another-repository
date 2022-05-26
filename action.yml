@@ -24,6 +24,7 @@ runs:
     - name: set branch name
       id: new_branch
       run: echo ::set-output name=new_branch::$(echo "client_update_$(date +'%Y-%m-%dT%H.%M.%S')")
+      shell: bash
     - name: Checkout
       uses: actions/checkout@v3
       with:
@@ -37,6 +38,7 @@ runs:
     - name: run js client generation
       working-directory: ./specs
       run: ${{ inputs.build-command }}
+      shell: bash
     # - run: cp -R ./specs/examples/sdk/ts/* ./qase-javascript/qaseio/src
     # - id: git-check
     #   working-directory: ./qase-javascript
